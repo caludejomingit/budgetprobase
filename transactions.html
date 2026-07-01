@@ -9,12 +9,18 @@
 <meta name="apple-mobile-web-app-title" content="Budget Pro">
 <meta name="theme-color" content="#164F3A">
 <title>Transactions · Budget Pro</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%231E6B4E'/%3E%3Cpath d='M12 19c-4-2-6-6-5-11 5-1 9 1 10 6 .7 3.6-2 6-5 5z' fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M9.5 14c2-2.7 4-4 6-6' fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%231E6B4E'/%3E%3Cpath d='M4.5 15.5l4.2-4.2 3.3 3.3L18.5 7' fill='none' stroke='white' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M14 7h4.5v4.5' fill='none' stroke='white' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body data-page="transactions">
+
+<div class="app-splash" id="appSplash">
+  <div class="splash-mark"><svg viewBox="0 0 24 24"><path d="M4.5 15.5l4.2-4.2 3.3 3.3L18.5 7" fill="none" stroke="white" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 7h4.5v4.5" fill="none" stroke="white" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="splash-title">Budget Pro</div>
+  <div class="splash-sub">Plan. Track. Grow.</div>
+</div>
 
 <header id="shell-mobile-topbar" class="mobile-topbar"></header>
 
@@ -45,7 +51,7 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Category</th><th>Date</th><th>Note</th><th style="text-align:right;">Amount</th><th></th></tr>
+            <tr><th>Category</th><th>Date &amp; note</th><th style="text-align:right;">Amount</th><th></th></tr>
           </thead>
           <tbody id="txTableBody"></tbody>
         </table>
@@ -102,10 +108,13 @@ async function onMonthChanged(){ await renderTransactionsPage(); }
 async function onDataChanged(){ await renderTransactionsPage(); }
 
 (async function init(){
-  buildShell('transactions');
+  const user = await requireAuth();
+  if(sb && !user) return;
+  buildShell('transactions', user);
   renderConfigBannerIfNeeded();
   await loadAllData();
   await renderTransactionsPage();
+  hideSplash();
   const params = new URLSearchParams(window.location.search);
   if(params.get('add')==='1') openTxModal();
 })();

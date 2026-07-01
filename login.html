@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Budget Pro">
+<meta name="theme-color" content="#164F3A">
+<title>Sign in · Budget Pro</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%231E6B4E'/%3E%3Cpath d='M4.5 15.5l4.2-4.2 3.3 3.3L18.5 7' fill='none' stroke='white' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M14 7h4.5v4.5' fill='none' stroke='white' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="login">
+
+<div class="app-splash" id="appSplash">
+  <div class="splash-mark"><svg viewBox="0 0 24 24"><path d="M4.5 15.5l4.2-4.2 3.3 3.3L18.5 7" fill="none" stroke="white" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 7h4.5v4.5" fill="none" stroke="white" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="splash-title">Budget Pro</div>
+  <div class="splash-sub">Plan. Track. Grow.</div>
+</div>
+
+<div class="auth-shell">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="auth-mark"><svg viewBox="0 0 24 24"><path d="M4.5 15.5l4.2-4.2 3.3 3.3L18.5 7" fill="none" stroke="white" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 7h4.5v4.5" fill="none" stroke="white" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="auth-brand-text"><div class="t1">Budget Pro</div><div class="t2">Plan. Track. Grow.</div></div>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchAuthMode('login')">Log in</button>
+      <button class="auth-tab" id="tabSignup" onclick="switchAuthMode('signup')">Create account</button>
+    </div>
+
+    <div id="authBanner" class="auth-banner" style="display:none;"></div>
+
+    <form id="authForm">
+      <div class="field" id="fieldName" style="display:none;">
+        <label for="authName">Full name</label>
+        <input type="text" id="authName" placeholder="e.g. Jomin George">
+      </div>
+      <div class="field">
+        <label for="authEmail">Email</label>
+        <input type="email" id="authEmail" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="authPassword">Password</label>
+        <input type="password" id="authPassword" placeholder="At least 6 characters" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary auth-submit" type="submit" id="authSubmitBtn">Log in</button>
+    </form>
+
+    <div class="auth-switch" id="authSwitchLine">
+      Don't have an account? <button type="button" onclick="switchAuthMode('signup')">Create one</button>
+    </div>
+
+    <div class="auth-foot">Your data is private to your account and stored securely in your own Supabase project.</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+<script>
+let authMode = 'login';
+
+function switchAuthMode(mode){
+  authMode = mode;
+  const isSignup = mode === 'signup';
+  document.getElementById('tabLogin').classList.toggle('active', !isSignup);
+  document.getElementById('tabSignup').classList.toggle('active', isSignup);
+  document.getElementById('fieldName').style.display = isSignup ? 'block' : 'none';
+  document.getElementById('authSubmitBtn').textContent = isSignup ? 'Create account' : 'Log in';
+  document.getElementById('authSwitchLine').innerHTML = isSignup
+    ? `Already have an account? <button type="button" onclick="switchAuthMode('login')">Log in</button>`
+    : `Don't have an account? <button type="button" onclick="switchAuthMode('signup')">Create one</button>`;
+  hideAuthBanner();
+}
+function showAuthBanner(msg, kind){
+  const el = document.getElementById('authBanner');
+  el.textContent = msg;
+  el.className = 'auth-banner show ' + (kind||'');
+  el.style.display = 'block';
+}
+function hideAuthBanner(){
+  const el = document.getElementById('authBanner');
+  el.style.display = 'none';
+}
+
+document.getElementById('authForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  hideAuthBanner();
+
+  if(!sb){
+    showAuthBanner('Not connected to a database yet. Open js/config.js and paste in your Supabase keys.', 'error');
+    return;
+  }
+
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const name = document.getElementById('authName').value.trim();
+
+  if(!email || !password){
+    showAuthBanner('Please fill in your email and password.', 'error');
+    return;
+  }
+  if(authMode === 'signup' && !name){
+    showAuthBanner('Please tell us your name.', 'error');
+    return;
+  }
+  if(password.length < 6){
+    showAuthBanner('Password should be at least 6 characters.', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('authSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = authMode === 'signup' ? 'Creating account…' : 'Logging in…';
+
+  try{
+    if(authMode === 'signup'){
+      const data = await signUpUser(name, email, password);
+      if(data.session){
+        window.location.href = 'index.html';
+      } else {
+        showAuthBanner('Account created! Check your email to confirm it, then log in below.', 'success');
+        switchAuthMode('login');
+      }
+    } else {
+      await signInUser(email, password);
+      window.location.href = 'index.html';
+    }
+  }catch(err){
+    showAuthBanner(err.message || 'Something went wrong. Please try again.', 'error');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = authMode === 'signup' ? 'Create account' : 'Log in';
+  }
+});
+
+(async function init(){
+  if(sb){
+    const user = await getSessionUser();
+    if(user){ window.location.href = 'index.html'; return; }
+  } else {
+    showAuthBanner('Not connected to a database yet. Open js/config.js and paste in your Supabase project URL and anon key.', 'error');
+  }
+  hideSplash();
+})();
+</script>
+</body>
+</html>
